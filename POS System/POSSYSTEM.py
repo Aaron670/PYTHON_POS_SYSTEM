@@ -1,10 +1,23 @@
 from tkinter import *
 from tkinter import ttk
+from DatabaseOpen import DatabaseOpen
+import locale
 
+locale.setlocale(locale.LC_ALL, 'en_PH')
+
+class Items(Button):
+    def __init__(self,name,price,img):
+        self.name= name
+        self.price= price
+        self.img =img
 
 class PosSystem_Start(Frame):
 
     def __init__(self, master):
+        #=========DATABASE HERE=========
+        a= DatabaseOpen()
+        self.db= a.FetchData()
+        #===============================
         Frame.__init__(self, master)
         self.master = master
         self.master.resizable(width=False, height=False)
@@ -25,13 +38,17 @@ class PosSystem_Start(Frame):
 
         pass
     def UpdateTotal(self):
-        self.GrandTotalLabel.configure(text=f"Grand Total: ${self.GrandTotal:.2f}")
+        global formatted_currency
+        formatted_currency = locale.currency(self.GrandTotal, grouping=True)
+
+        self.GrandTotalLabel.configure(text=f"Grand Total: {formatted_currency}")
 
     def DebugAdd(self): #Remove in Final Build
         array = ["TestItem",10,200]
         self.AddItems(array[0],array[1],array[2])
         
         
+
 
     def ClearList(self):
         self.GrandTotal=0
@@ -57,7 +74,6 @@ class PosSystem_Start(Frame):
         
 #FRONT END HERE
     def create_widgets(self):
-        global GrandTotal
         self.Empty= Frame(root)
         self.Empty.pack(side=LEFT,padx=15)
         self.FrameItems =Frame(root)
@@ -66,12 +82,12 @@ class PosSystem_Start(Frame):
 
         self.FrameTotal = Frame(root)
         self.FrameTotal.pack(side=RIGHT)
-        self.GrandTotalLabel= Label(text=f"Grand Total: ₱{self.GrandTotal:.2f}")
+        self.GrandTotalLabel= Label(text=f"Grand Total: ₱{self.GrandTotal:.2f}",font="Arial 20")
         self.GrandTotalLabel.pack()
 
 
 
-        self.ItemList = ttk.Treeview(self.FrameItems, columns=("#", "Item Info", "Quantity", "Price","Button"), show="headings")
+        self.ItemList = ttk.Treeview(self.FrameItems, columns=("#", "Item Info", "Quantity", "Price"), show="headings")
 
         self.ItemList.heading("#",text="#",anchor=W)
         self.ItemList.heading("Item Info",text="Item Info",anchor=W)
@@ -91,11 +107,28 @@ class PosSystem_Start(Frame):
         self.button3.pack()
 
 
-    
+        self.FrameItemsC =Frame(root,bg="gray")
+        self.FrameItemsC.pack(side=RIGHT)
+        self.AddStuff()
 
+    def getItem(self,k):
+        j=0
+        db=self.db
+        print(k)
+        self.AddItems(db[k][1]['ItemName'],1,db[k][1]['Price'])
+        
 
-
-
+    def AddStuff(self):
+        Label(self.FrameItemsC,text="ITO UNG MENU").pack
+        db=self.db
+        print(db)
+        j=0
+        for i in db:
+            i = Button(self.FrameItemsC,text=db[j][1]['ItemName'],command=lambda i=i: self.getItem(i))
+            self.tasks.append(i)
+            i.grid(column=1,row=j)
+            
+            j=j+1
 
 
 
