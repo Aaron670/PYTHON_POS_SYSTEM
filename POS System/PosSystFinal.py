@@ -7,10 +7,9 @@ locale.setlocale(locale.LC_ALL, 'en_PH')
 class PosSystem_Start(Frame):
     def __init__(self, master,name):
         self.master = master
-        self.master.geometry("1366x720")
+        self.master.geometry("1310x650")
         self.master.title("DEPARTMENT STORE P.O.S")
-        self.master.maxsize(1300, 650)
-        self.master.minsize(1300, 650)
+        self.master.resizable(0,0)
         self.master.configure(bg = "light gray")
         self.db=[]
         self.GrandTotal=0
