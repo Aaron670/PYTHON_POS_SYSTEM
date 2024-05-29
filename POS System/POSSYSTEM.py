@@ -27,6 +27,7 @@ class PosSystem_Start(Frame):
         self.ItemsN=0
         self.GrandTotal=0.00
         self.create_widgets()
+        root.bind("<BackSpace>", lambda event: self.delete())
         
     #Back-End 
     def AddItems(self, item,quantity, price):
@@ -43,10 +44,7 @@ class PosSystem_Start(Frame):
 
         self.GrandTotalLabel.configure(text=f"Grand Total: {formatted_currency}")
 
-    def DebugAdd(self): #Remove in Final Build
-        array = ["TestItem",10,200]
-        self.AddItems(array[0],array[1],array[2])
-        
+
         
 
 
@@ -99,10 +97,8 @@ class PosSystem_Start(Frame):
         self.ItemList.pack(fill="both", expand=True)
 
 
-        self.button1= Button(root,command=self.DebugAdd,text="Debug: Add To List")
         self.button2= Button(root,command=self.delete,text="Remove Last in List")
         self.button3 = Button(root,command=self.ClearList,text="Clear List")
-        self.button1.pack()
         self.button2.pack()
         self.button3.pack()
 
@@ -123,8 +119,10 @@ class PosSystem_Start(Frame):
         db=self.db
         print(db)
         j=0
+        alAr=["q","w","e","r"]
         for i in db:
             i = Button(self.FrameItemsC,text=db[j][1]['ItemName'],command=lambda i=i: self.getItem(i))
+            root.bind(f"<KeyPress-{alAr[j]}>", lambda event: self.getItem(i))
             self.tasks.append(i)
             i.grid(column=1,row=j)
             
@@ -134,5 +132,6 @@ class PosSystem_Start(Frame):
 
 root=Tk()
 PosSystem_Start(root)
+
 
 root.mainloop()

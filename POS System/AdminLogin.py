@@ -77,6 +77,7 @@ class AdminPanel(Frame):
             
 
         NewWindow = Tk()
+        NewWindow.title("ADD PRODUCT")
         entries = []
         Items = []
         j=1
@@ -93,7 +94,30 @@ class AdminPanel(Frame):
         print("Add")
 
     def UpdateProduct(self):
+        def save():
+            Save=[]
+            for i in entries:
+
+                Save.append(i.get())
+                print(Save)
+                pass
+            
+
         print("Up")
+        NewWindow= Tk()
+        array=["Product Name: ","Change Price: "]
+        entries =[]
+        j=0
+        for i in array:
+            i= Label(NewWindow,text=f"{array[j]}").grid(column=0,row=j)
+            name = Entry(NewWindow)
+            name.grid(column=1,row=j)
+            entries.append(name)
+            j=j+1
+        Button(NewWindow,text="Submit",command=save).grid(column=4,row=j+2)
+
+        
+
 
     def DeleteProduct(self):
         def save():
@@ -112,6 +136,7 @@ class AdminPanel(Frame):
         entry.grid(column=0,row=1)
         button1= Button(NewWindow,text="Save", command=save)
         button1.grid(column=3,row=4)
+        NewWindow.title("DELETE PRODUCT")
 
     def ProductList(self):
         print("Check")
@@ -122,7 +147,7 @@ class AdminPanel(Frame):
         NewWindow.geometry("300x900")
         canvas = Canvas(NewWindow, yscrollcommand=v_scrollbar.set)
         canvas.pack(fill='both', expand=True)
-        
+        NewWindow.title("PRODUCT LIST")
         
         v_scrollbar.config(command=canvas.yview)
 
@@ -142,7 +167,7 @@ class AdminPanel(Frame):
     def create_widgets(self):
         self.Canva1= Canvas(self.master)
         self.Canva1.pack(anchor=CENTER)
-
+        self.master.title("ADMIN PAGE")
         # List ng mga buttons // NOTE: Mag iiba na pangalan nung buttons once na initialize ng gantong paraan
         buttons = ["Add New Product:", "Update Product: ","Delete Product: ","Check Product List: "]
         # List ng mga func names na nasa loob nung class
