@@ -1,6 +1,10 @@
 import sqlite3
 from tkinter import *
 from tkinter import messagebox
+import FoodPOS
+
+import sys
+sys.path.insert(1, './Lib')
 from DatabaseOpen import DatabaseOpen
 
 class AdminPanel(Frame):
@@ -13,7 +17,7 @@ class AdminPanel(Frame):
         self.master.title("Admin Login")
         self.master.geometry("400x700")
         self.Login()
-        self.array = ["Name of Product: ","Price: ","ImageName: "]
+        self.array = ["Name of Product: ","Price: ","ImageName: ","Number Placement 1-8"]
         self.conn = self.db.Connect()
 
     #Back-End   
@@ -72,7 +76,7 @@ class AdminPanel(Frame):
                     Items.append(a)  
             a = self.conn.cursor()
             
-            a.execute(f"INSERT INTO Items VALUES(?,?,?)",[entries[0].get(),entries[1].get(),entries[2].get()])
+            a.execute(f"INSERT INTO Foods VALUES(?,?,?,?)",[entries[0].get(),entries[1].get(),entries[3].get(),entries[2].get()])
             self.conn.commit()
             
 
@@ -95,17 +99,23 @@ class AdminPanel(Frame):
 
     def UpdateProduct(self):
         def save():
-            Save=[]
-            for i in entries:
-
-                Save.append(i.get())
-                print(Save)
-                pass
+            for entry in entries:
+                a= entry.get()
+                if(a==""):
+                  print("Please complete the form")
+                  break
+                else:
+                    print("yay")
+                    
+            a = self.conn.cursor()
+            
+            a.execute(f"UPDATE Foods ItemName=(?,?,?,?)",[entries[3].get(),entries[0].get(),entries[1].get(),entries[2].get()])
+            self.conn.commit()
             
 
         print("Up")
         NewWindow= Tk()
-        array=["Product Name: ","Change Price: "]
+        array=["Original Product Name: ","New Name: ","Change Price: ","Change Row: "]
         entries =[]
         j=0
         for i in array:
@@ -124,7 +134,7 @@ class AdminPanel(Frame):
             entry1= entry.get()
             a = self.conn.cursor()
         
-            a.execute(f"DELETE FROM Items WHERE ItemName=?",[entry1])
+            a.execute(f"DELETE FROM Foods WHERE ItemName=?",[entry1])
 
             self.conn.commit()
             print("Successfully Deleted")
@@ -151,27 +161,34 @@ class AdminPanel(Frame):
         
         v_scrollbar.config(command=canvas.yview)
 
-
+        
         db=self.db.FetchData()
+        print(db)
         j=0
         for i in db:
             print(i)
             w=Label(canvas,text="=================").pack()
             i=Label(canvas,text=f"Item Name: {db[j][1]['ItemName']}",justify=LEFT).pack()
             i=Label(canvas,text=f"Item Price: {db[j][1]['Price']}",justify=LEFT).pack()
+            i=Label(canvas,text=f"ItemRow: {db[j][1]['ItemNum']}",justify=LEFT).pack()
 
             j=j+1
         canvas.config(scrollregion=canvas.bbox('all'))
 
+
+    def OpenPOS(self):
+                root1= Tk()
+                FoodPOS.PosSystem_Start(root1)
+                self.master.destroy()
 
     def create_widgets(self):
         self.Canva1= Canvas(self.master)
         self.Canva1.pack(anchor=CENTER)
         self.master.title("ADMIN PAGE")
         # List ng mga buttons // NOTE: Mag iiba na pangalan nung buttons once na initialize ng gantong paraan
-        buttons = ["Add New Product:", "Update Product: ","Delete Product: ","Check Product List: "]
+        buttons = ["Add New Product:", "Update Product: ","Delete Product: ","Check Product List: ","Open POS System"]
         # List ng mga func names na nasa loob nung class
-        methods= [self.AddProduct,self.UpdateProduct,self.DeleteProduct,self.ProductList]
+        methods= [self.AddProduct,self.UpdateProduct,self.DeleteProduct,self.ProductList,self.OpenPOS]
         #Counter
         j=0
         for i in buttons:
@@ -180,7 +197,8 @@ class AdminPanel(Frame):
             j=j+1
 
 
-root= Tk()
-AdminPanel(root)
+if __name__ == "__main__":
+    root= Tk()
+    AdminPanel(root)
 
-root.mainloop()
+    root.mainloop()
