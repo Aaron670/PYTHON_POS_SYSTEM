@@ -28,7 +28,6 @@ class DatabaseOpen():
         f={}
         j=0
         for i in e:
-            print("THIS IS i",i)
             i=str(i)
             i=eval(i)        
             f[j]=i

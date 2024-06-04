@@ -1,5 +1,6 @@
 import sqlite3
 from tkinter import *
+from tkinter import ttk
 from tkinter import messagebox
 import FoodPOS
 
@@ -108,8 +109,8 @@ class AdminPanel(Frame):
                     print("yay")
                     
             a = self.conn.cursor()
-            
-            a.execute(f"UPDATE Foods ItemName=(?,?,?,?)",[entries[3].get(),entries[0].get(),entries[1].get(),entries[2].get()])
+            aa=entries[0]
+            a.execute(f"UPDATE Foods ItemName=? Price=? ItemNum=? Where ItemName={aa}",[entries[1].get(),entries[2].get(),entries[3].get(),entries[2].get()])
             self.conn.commit()
             
 
@@ -151,29 +152,25 @@ class AdminPanel(Frame):
     def ProductList(self):
         print("Check")
         NewWindow=Tk()
-        v_scrollbar = Scrollbar(NewWindow, orient='vertical')
-        v_scrollbar.pack(side='right', fill='y')
 
         NewWindow.geometry("300x900")
-        canvas = Canvas(NewWindow, yscrollcommand=v_scrollbar.set)
-        canvas.pack(fill='both', expand=True)
-        NewWindow.title("PRODUCT LIST")
-        
-        v_scrollbar.config(command=canvas.yview)
 
+        NewWindow.title("PRODUCT LIST")
+
+        self.ItemList = ttk.Treeview(NewWindow, columns=("Item Info", "Price", "ROW"), show="headings",height=15)
+        self.columnTree=["Item Info", "Price","ROW"]
+        for i in self.columnTree:
+            self.ItemList.column(i,width=100, stretch=0,anchor=CENTER, minwidth=100)
+            self.ItemList.heading(i,text=i,anchor=CENTER)
+        self.ItemList.pack()
         
         db=self.db.FetchData()
         print(db)
         j=0
         for i in db:
             print(i)
-            w=Label(canvas,text="=================").pack()
-            i=Label(canvas,text=f"Item Name: {db[j][1]['ItemName']}",justify=LEFT).pack()
-            i=Label(canvas,text=f"Item Price: {db[j][1]['Price']}",justify=LEFT).pack()
-            i=Label(canvas,text=f"ItemRow: {db[j][1]['ItemNum']}",justify=LEFT).pack()
-
+            self.ItemList.insert("", "end",values=(db[j][1]['ItemName'], db[j][1]['Price'], db[j][1]['ItemNum']))
             j=j+1
-        canvas.config(scrollregion=canvas.bbox('all'))
 
 
     def OpenPOS(self):

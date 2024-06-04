@@ -3,6 +3,7 @@ from tkinter import ttk
 from tkinter import PhotoImage
 import locale
 import AdminLogin
+import datetime
 import time
 import sys
 sys.path.insert(1, './Lib')
@@ -52,7 +53,6 @@ class PosSystem_Start(Frame):
             for SelectItems in self.ItemList.get_children():
                 name=self.ItemList.item(SelectItems)["values"][0]
                 if(item==name):
-                    print(True)
                     curquan=self.ItemList.item(SelectItems)["values"][1]
                     self.DelItem(item)
                     quantity=quantity+curquan
@@ -64,14 +64,12 @@ class PosSystem_Start(Frame):
                 else:
                  pass   
             if(item!=name):
-                print("Not Equal",item,name)
                 self.ItemList.insert("", "end",values=(item, quantity, price),)
                 price= price*quantity
                 self.GrandTotal= self.GrandTotal+price
             
     
         else:
-            print("faield")
             self.ItemList.insert("", "end",values=(item, quantity, price),)
             price= price*quantity
             self.GrandTotal= self.GrandTotal+price
@@ -80,12 +78,24 @@ class PosSystem_Start(Frame):
 
         self.UpdateTotal()
     
-    def getItem(self,k):
-        j=0
+    def getItem(self,k,c):
+        print("waa")
         db=self.db
-        print(k)
-        self.AddItems(db[k][1]['ItemName'],1,db[k][1]['Price'])
+        if(c==""):
+            print(k)
+            self.AddItems(db[k][1]['ItemName'],1,db[k][1]['Price'])
+        else:
+            Item=f"{db[k][1]['ItemName']}({c})"
+            self.AddItems(Item,1,db[k][1]['Price'])
         
+    def ItemWhat(self,k):
+        newWind=Tk()
+        Label(newWind,text="Comment: ").grid(row=0)
+        Comment=Entry(newWind)
+        Comment.grid(row=1)
+        newWind.bind(f"<Tab>", lambda event: [self.getItem(k,Comment.get()),newWind.destroy()])
+        self.master.bind(f"<Tab>", lambda event: [self.getItem(k,Comment.get()),newWind.destroy()])
+        button=Button(newWind,text="Save",command=lambda:[self.getItem(k,Comment.get()),newWind.destroy()]).grid(column=2,row=3)
         
   
 
@@ -153,6 +163,34 @@ class PosSystem_Start(Frame):
                 AdminLogin.AdminPanel(root1)
                 self.master.destroy()
          
+    def PrintOrder(self):
+        OrderWind=Tk()
+        for i in range(5):
+            Label(OrderWind,text="").grid(row=i+2,column=0)
+        x = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        Label(OrderWind,text=self.name1,font="Arial 20").grid(columnspan=3,row=0,sticky=N)
+        Label(OrderWind,text=x).grid(sticky=E,row=1,column=0)
+        j=4
+        
+        Label(OrderWind,text=f"========================").grid(columnspan=3,row=3)
+        for i in self.ItemList.get_children():
+            a= str(self.ItemList.item(i)['values'][0])
+            b= str(self.ItemList.item(i)['values'][1])
+            c= str(self.ItemList.item(i)['values'][2])
+            
+            Label(OrderWind,text=f"{a}").grid(column=0,row=j,sticky=W)
+            Label(OrderWind,text=f"{b}").grid(column=1,row=j)
+            Label(OrderWind,text=f"{c}").grid(column=2,row=j)
+            j=j+1
+            
+            
+            print(f"{a}     {b}     {c}")
+            pass
+        Label(OrderWind,text=f"========================").grid(columnspan=3,row=j+1)
+        Label(OrderWind,text=f"Total: {self.GrandTotal}").grid(column=0,row=j+2,sticky=W)
+        Label(OrderWind,text=f"-------------------------------------").grid(columnspan=3,row=j+3,sticky=S)
+        Label(OrderWind,text=f"    ***THANK YOU***     ").grid(columnspan=3,row=j+4,sticky=S)
+        self.ClearList()
     
     def CreateWidgets(self):
         
@@ -201,20 +239,26 @@ class PosSystem_Start(Frame):
     
 
     def CreateButtons(self):
-        frameArray=["self.framefood1","self.framefood2","self.framefood3"]
+        frameArray=["1","self.framefood2","self.framefood3","4","5","6","7","8"]
         self.frameArrayLoop=[]
         j=1
+        k=1
         for i in frameArray:
+            if(j==3)or(j==5)or(j==7):
+                print(j)
+                j=1
+                k=k+1
+                
             i=Frame(self.frame3, width = 400, height = 130, bg = "light gray")
             self.frameArrayLoop.append(i)
-            i.grid(row=j,column=1)
+            i.grid(row=k,column=j,sticky=W)
             j=j+1
-            pass
+                
 
         spButton1 = Button(self.master, text = "VOID ORDER", bg = "red", fg= "black", font = "Arial 12", activebackground= "red",command=self.ClearList)
         spButton1.place(x = 120, y = 585)
 
-        spButton2 = Button(self.master, text = "CHECK OUT", bg = "green", fg= "black", font = "Arial 12", activebackground= "green")
+        spButton2 = Button(self.master, text = "CHECK OUT", bg = "green", fg= "black", font = "Arial 12", activebackground= "green",command=self.PrintOrder)
         spButton2.place(x = 230, y = 585)
 
         spbutton3 = Button(self.spFrame, width= 10, height=8, text = "SPEC BUTTON", bg= "gray", fg = "black", activebackground= "gray")
@@ -233,21 +277,20 @@ class PosSystem_Start(Frame):
 
         #food section 
         
-        buttond1 = Button(self.frameArrayLoop[0], width= 10, height=8, text = "FOOD 1", bg= "yellow", fg = "black", activebackground= "yellow")
-        buttond1.grid(row = 1, column = 1)
-        
+
         db=self.db
-        print(db)
         j=0
-        alAr=["q","w","e","r"]
+        alAr="qwertyuiopasdfghjkl;'zxcvbn"
         for i in db:
             #phIMG = PhotoImage(f"./Settings/ImageLinks/{db[j][1]['ImageName']}")
-            phIMG = PhotoImage(file="Settings/ImageLinks/burger.png")
+            iImg=db[j][1]['ImageName']
+            phIMG = PhotoImage(file=f"Settings/ImageLinks/Menu50/{iImg}")
             RowNum=int(db[j][1]['ItemNum'])
             
-            i = Button(self.frameArrayLoop[RowNum-1], text=db[j][1]['ItemName'],command=lambda i=i: self.getItem(i), width= 10, height=8, bg= "yellow", fg = "black", activebackground= "yellow")
-            #i = Label(self.frameArrayLoop[0], width= 10, height=8,image=phIMG)    Photo INSTEAD OF TEXT
-            i.bind(f"<KeyPress-{alAr[j]}>", lambda event: self.getItem(i))
+            #i = Button(self.frameArrayLoop[RowNum-1], text=db[j][1]['ItemName'],command=lambda i=i: self.getItem(i), width= 10, height=8, bg= "yellow", fg = "black", activebackground= "yellow")
+            i = Button(self.frameArrayLoop[RowNum-1],image=phIMG,command=lambda i=i: self.ItemWhat(i))   # Photo INSTEAD OF TEXT
+
+            i.phIMG=phIMG
             self.tasks.append(i)
             i.grid(column=j,row=1)
             
@@ -256,39 +299,6 @@ class PosSystem_Start(Frame):
 
 
 
-
-        #food section 
-        frameFood6 = Frame(self.frame3, width = 400, height = 130, bg = "light gray")
-        frameFood6.grid(row = 2, column = 2)
-
-        buttonto1 = Button(frameFood6, width= 10, height=8, text = "FOOD 1", bg= "purple", fg = "black", activebackground= "purple")
-        buttonto1.grid(row = 1, column = 1)
-
-        buttonto2 = Button(frameFood6, width= 10, height=8, text = "FOOD 2", bg= "purple", fg = "black", activebackground= "purple")
-        buttonto2.grid(row = 1, column = 2)
-
-
-        #food section
-        frameFood7 = Frame(self.frame3, width = 400, height = 130, bg = "light gray")
-        frameFood7.grid(row = 3, column = 2)
-
-        buttonfur1 = Button(frameFood7, width= 10, height=8, text = "FOOD 1", bg= "pink", fg = "black", activebackground= "pink")
-        buttonfur1.grid(row = 1, column = 1)
-
-        buttonfur2 = Button(frameFood7, width= 10, height=8, text = "FOOD 2", bg= "pink", fg = "black", activebackground= "pink")
-        buttonfur2.grid(row = 1, column = 2)
-
-
-
-        #food section
-        frameFood8= Frame(self.frame3, width = 400, height = 130, bg = "light gray")
-        frameFood8.grid(row = 4, column = 2)
-
-        buttoncos1 = Button(frameFood8, width= 10, height=8, text = "FOOD", bg= "sienna", fg = "black", activebackground= "sienna")
-        buttoncos1.grid(row = 1, column = 1)
-
-        buttoncos2 = Button(frameFood8, width= 10, height=8, text = "FOOD 2", bg= "sienna", fg = "black", activebackground= "sienna")
-        buttoncos2.grid(row = 1, column = 2)
 
 
 
